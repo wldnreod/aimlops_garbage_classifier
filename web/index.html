@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쓰레기 분류 AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { background: white; border-radius: 20px; padding: 40px; max-width: 600px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { color: #333; margin-bottom: 30px; text-align: center; font-size: 2em; }
+        .upload-area { border: 3px dashed #667eea; border-radius: 15px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; }
+        .upload-area:hover { border-color: #764ba2; background: #f8f9ff; }
+        .upload-area.drag-over { border-color: #764ba2; background: #f0f0ff; }
+        input[type="file"] { display: none; }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 40px; border-radius: 25px; font-size: 16px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; transition: transform 0.2s; }
+        button:hover { transform: scale(1.05); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: scale(1); }
+        #preview { max-width: 100%; border-radius: 10px; margin: 20px 0; display: none; }
+        #result { margin-top: 30px; padding: 20px; background: #f8f9ff; border-radius: 15px; display: none; }
+        .result-label { font-size: 1.5em; color: #667eea; font-weight: bold; margin-bottom: 10px; }
+        .result-score { color: #666; font-size: 1.2em; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error { background: #ffe6e6; color: #cc0000; padding: 15px; border-radius: 10px; margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗑️ 쓰레기 분류 AI</h1>
+        
+        <div class="upload-area" id="uploadArea">
+            <p style="font-size: 1.2em; color: #666;">📷 이미지를 클릭하거나 드래그하여 업로드</p>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+        
+        <img id="preview">
+        <div class="spinner" id="spinner"></div>
+        
+        <button id="classifyBtn" style="display: none;">분류하기</button>
+        
+        <div id="result">
+            <div class="result-label" id="resultLabel"></div>
+            <div class="result-score" id="resultScore"></div>
+        </div>
+        
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://garbage-classifier-16970477973.asia-northeast3.run.app';
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const classifyBtn = document.getElementById('classifyBtn');
+        const result = document.getElementById('result');
+        const resultLabel = document.getElementById('resultLabel');
+        const resultScore = document.getElementById('resultScore');
+        const spinner = document.getElementById('spinner');
+        const errorDiv = document.getElementById('error');
+
+        let selectedFile = null;
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleFile(file);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+        
+        function handleFile(file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                classifyBtn.style.display = 'block';
+                result.style.display = 'none';
+                errorDiv.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        classifyBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            classifyBtn.disabled = true;
+            spinner.style.display = 'block';
+            result.style.display = 'none';
+            errorDiv.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            try {
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultLabel.textContent = `분류 결과: ${data.prediction.label}`;
+                    resultScore.textContent = `신뢰도: ${(data.prediction.score * 100).toFixed(2)}%`;
+                    result.style.display = 'block';
+                } else {
+                    throw new Error(data.detail || '분류 실패');
+                }
+            } catch (error) {
+                errorDiv.textContent = `오류: ${error.message}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                spinner.style.display = 'none';
+                classifyBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
