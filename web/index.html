@@ -9,6 +9,23 @@
         body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .container { background: white; border-radius: 20px; padding: 40px; max-width: 600px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
         h1 { color: #333; margin-bottom: 30px; text-align: center; font-size: 2em; }
+        
+        /* 로그인 화면 */
+        #loginScreen { text-align: center; }
+        .login-btn { background: white; color: #333; border: 2px solid #ddd; padding: 15px 40px; border-radius: 25px; font-size: 16px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; }
+        .login-btn:hover { border-color: #667eea; background: #f8f9ff; }
+        
+        /* 사용자 정보 */
+        .user-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 15px; background: #f8f9ff; border-radius: 10px; }
+        .user-info img { width: 40px; height: 40px; border-radius: 50%; }
+        .user-name { flex: 1; margin-left: 10px; font-weight: bold; color: #333; }
+        .logout-btn { background: #ff4444; color: white; border: none; padding: 8px 20px; border-radius: 15px; cursor: pointer; font-size: 14px; }
+        
+        /* 탭 메뉴 */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        
         .upload-area { border: 3px dashed #667eea; border-radius: 15px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; }
         .upload-area:hover { border-color: #764ba2; background: #f8f9ff; }
         .upload-area.drag-over { border-color: #764ba2; background: #f0f0ff; }
@@ -23,32 +40,109 @@
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .error { background: #ffe6e6; color: #cc0000; padding: 15px; border-radius: 10px; margin-top: 20px; display: none; }
+        
+        /* 히스토리 */
+        #historyTab { display: none; }
+        .history-item { background: #f8f9ff; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 15px; align-items: center; }
+        .history-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+        .history-info { flex: 1; }
+        .history-label { font-weight: bold; color: #667eea; font-size: 1.1em; }
+        .history-date { color: #999; font-size: 0.9em; margin-top: 5px; }
+        .no-history { text-align: center; color: #999; padding: 40px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🗑️ 쓰레기 분류 AI</h1>
         
-        <div class="upload-area" id="uploadArea">
-            <p style="font-size: 1.2em; color: #666;">📷 이미지를 클릭하거나 드래그하여 업로드</p>
-            <input type="file" id="fileInput" accept="image/*">
+        <!-- 로그인 화면 -->
+        <div id="loginScreen">
+            <p style="margin-bottom: 30px; color: #666;">로그인하여 분석 기록을 저장하세요</p>
+            <button class="login-btn" id="googleLoginBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Google로 로그인
+            </button>
         </div>
         
-        <img id="preview">
-        <div class="spinner" id="spinner"></div>
-        
-        <button id="classifyBtn" style="display: none;">분류하기</button>
-        
-        <div id="result">
-            <div class="result-label" id="resultLabel"></div>
-            <div class="result-score" id="resultScore"></div>
+        <!-- 메인 화면 (로그인 후) -->
+        <div id="mainScreen" style="display: none;">
+            <!-- 사용자 정보 -->
+            <div class="user-info">
+                <img id="userPhoto" src="" alt="User">
+                <span class="user-name" id="userName"></span>
+                <button class="logout-btn" id="logoutBtn">로그아웃</button>
+            </div>
+            
+            <!-- 탭 메뉴 -->
+            <div class="tabs">
+                <button class="tab active" id="classifyTabBtn">분류하기</button>
+                <button class="tab" id="historyTabBtn">내 기록</button>
+            </div>
+            
+            <!-- 분류 탭 -->
+            <div id="classifyTab">
+                <div class="upload-area" id="uploadArea">
+                    <p style="font-size: 1.2em; color: #666;">📷 이미지를 클릭하거나 드래그하여 업로드</p>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+                
+                <img id="preview">
+                <div class="spinner" id="spinner"></div>
+                
+                <button id="classifyBtn" style="display: none;">분류하기</button>
+                
+                <div id="result">
+                    <div class="result-label" id="resultLabel"></div>
+                    <div class="result-score" id="resultScore"></div>
+                </div>
+                
+                <div class="error" id="error"></div>
+            </div>
+            
+            <!-- 히스토리 탭 -->
+            <div id="historyTab">
+                <div id="historyList"></div>
+            </div>
         </div>
-        
-        <div class="error" id="error"></div>
     </div>
 
-    <script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyAntkuWODPMzCr6pBK6HInee9Vrd_Dvdc0",
+            authDomain: "garbage-classifier-27697.firebaseapp.com",
+            projectId: "garbage-classifier-27697",
+            storageBucket: "garbage-classifier-27697.firebasestorage.app",
+            messagingSenderId: "1079222481108",
+            appId: "1:1079222481108:web:f12b06ef3c20eae856cb41"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
         const API_URL = 'https://garbage-classifier-16970477973.asia-northeast3.run.app';
+
+        // DOM 요소
+        const loginScreen = document.getElementById('loginScreen');
+        const mainScreen = document.getElementById('mainScreen');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userName = document.getElementById('userName');
+        const userPhoto = document.getElementById('userPhoto');
+        
+        const classifyTabBtn = document.getElementById('classifyTabBtn');
+        const historyTabBtn = document.getElementById('historyTabBtn');
+        const classifyTab = document.getElementById('classifyTab');
+        const historyTab = document.getElementById('historyTab');
+        
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
@@ -58,9 +152,59 @@
         const resultScore = document.getElementById('resultScore');
         const spinner = document.getElementById('spinner');
         const errorDiv = document.getElementById('error');
+        const historyList = document.getElementById('historyList');
 
         let selectedFile = null;
+        let currentUser = null;
 
+        // 로그인 상태 감지
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                userName.textContent = user.displayName;
+                userPhoto.src = user.photoURL;
+                loginScreen.style.display = 'none';
+                mainScreen.style.display = 'block';
+                loadHistory();
+            } else {
+                currentUser = null;
+                loginScreen.style.display = 'block';
+                mainScreen.style.display = 'none';
+            }
+        });
+
+        // Google 로그인
+        googleLoginBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                alert('로그인 실패: ' + error.message);
+            }
+        });
+
+        // 로그아웃
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // 탭 전환
+        classifyTabBtn.addEventListener('click', () => {
+            classifyTabBtn.classList.add('active');
+            historyTabBtn.classList.remove('active');
+            classifyTab.style.display = 'block';
+            historyTab.style.display = 'none';
+        });
+
+        historyTabBtn.addEventListener('click', () => {
+            historyTabBtn.classList.add('active');
+            classifyTabBtn.classList.remove('active');
+            historyTab.style.display = 'block';
+            classifyTab.style.display = 'none';
+            loadHistory();
+        });
+
+        // 파일 업로드
         uploadArea.addEventListener('click', () => fileInput.click());
         
         uploadArea.addEventListener('dragover', (e) => {
@@ -99,8 +243,9 @@
             reader.readAsDataURL(file);
         }
         
+        // 분류하기
         classifyBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
+            if (!selectedFile || !currentUser) return;
             
             classifyBtn.disabled = true;
             spinner.style.display = 'block';
@@ -111,6 +256,7 @@
             formData.append('file', selectedFile);
             
             try {
+                // AI 분류 실행
                 const response = await fetch(`${API_URL}/predict`, {
                     method: 'POST',
                     body: formData
@@ -119,9 +265,29 @@
                 const data = await response.json();
                 
                 if (response.ok && data.success) {
+                    // 결과 표시
                     resultLabel.textContent = `분류 결과: ${data.prediction.label}`;
                     resultScore.textContent = `신뢰도: ${(data.prediction.score * 100).toFixed(2)}%`;
                     result.style.display = 'block';
+                    
+                    // Firebase Storage에 이미지 업로드
+                    const timestamp = Date.now();
+                    const imageRef = ref(storage, `images/${currentUser.uid}/${timestamp}_${selectedFile.name}`);
+                    await uploadBytes(imageRef, selectedFile);
+                    const imageUrl = await getDownloadURL(imageRef);
+                    
+                    // Firestore에 분석 결과 저장
+                    await addDoc(collection(db, 'classifications'), {
+                        userId: currentUser.uid,
+                        userName: currentUser.displayName,
+                        imageUrl: imageUrl,
+                        label: data.prediction.label,
+                        score: data.prediction.score,
+                        timestamp: new Date(),
+                        inferenceTime: data.inference_time_ms
+                    });
+                    
+                    alert('분석 결과가 저장되었습니다!');
                 } else {
                     throw new Error(data.detail || '분류 실패');
                 }
@@ -133,6 +299,46 @@
                 classifyBtn.disabled = false;
             }
         });
+
+        // 히스토리 로드
+        async function loadHistory() {
+            if (!currentUser) return;
+            
+            historyList.innerHTML = '<div class="spinner" style="display: block;"></div>';
+            
+            try {
+                const q = query(
+                    collection(db, 'classifications'),
+                    where('userId', '==', currentUser.uid),
+                    orderBy('timestamp', 'desc')
+                );
+                
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    historyList.innerHTML = '<div class="no-history">분석 기록이 없습니다</div>';
+                    return;
+                }
+                
+                historyList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.innerHTML = `
+                        <img src="${data.imageUrl}" class="history-img" alt="이미지">
+                        <div class="history-info">
+                            <div class="history-label">${data.label}</div>
+                            <div class="result-score">신뢰도: ${(data.score * 100).toFixed(2)}%</div>
+                            <div class="history-date">${new Date(data.timestamp.seconds * 1000).toLocaleString('ko-KR')}</div>
+                        </div>
+                    `;
+                    historyList.appendChild(item);
+                });
+            } catch (error) {
+                historyList.innerHTML = `<div class="error" style="display: block;">기록 로드 실패: ${error.message}</div>`;
+            }
+        }
     </script>
 </body>
 </html>
