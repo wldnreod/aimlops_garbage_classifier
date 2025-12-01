@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "GarbageClassifier",
+    "slug": "garbage-classifier",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "platforms": [
+      "android"
+    ],
+    "sdkVersion": "49.0.0",
+    "android": {
+      "package": "com.example.garbageclassifier",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#4CAF50"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c3807ec9-c587-43af-b400-82d5281dd303"
+      }
+    },
+    "owner": "zuuuv"
+  }
+}

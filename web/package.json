@@ -1,0 +1,9 @@
+{
+  "name": "garbage-classifier-web",
+  "version": "1.0.0",
+  "description": "Garbage Classification AI Web Demo",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "build": "echo 'No build needed'"
+  }
+}
