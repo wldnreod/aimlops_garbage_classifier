@@ -39,7 +39,6 @@ class GarbageClassifier:
             with torch.no_grad():
                 outputs = self.model(**inputs)
                 probs = torch.nn.functional.softmax(outputs.logits, dim=1).squeeze()
-                confidence, predicted_idx = torch.max(probs, dim=-1)
             
             # 10개 클래스 라벨
             labels = {
@@ -48,12 +47,29 @@ class GarbageClassifier:
                 8: "Shoes", 9: "Trash"
             }
             
-            label = labels[predicted_idx.item()]
-            score = confidence.item()
+            # 상위 2개 예측 가져오기
+            top2_probs, top2_indices = torch.topk(probs, k=2)
+            
+            predicted_idx = top2_indices[0].item()
+            predicted_label = labels[predicted_idx]
+            predicted_score = top2_probs[0].item()
+            
+            # Glass vs Plastic 혼동 방지: 차이가 작으면 Plastic 우선
+            if predicted_label == "Glass" and top2_indices[1].item() == 7:  # 7 = Plastic
+                prob_diff = top2_probs[0].item() - top2_probs[1].item()
+                if prob_diff < 0.15:  # 차이가 15% 미만이면 Plastic으로
+                    logger.info(f"Glass({top2_probs[0].item():.3f}) vs Plastic({top2_probs[1].item():.3f}) - Plastic 선택")
+                    predicted_idx = 7
+                    predicted_label = "Plastic"
+                    predicted_score = top2_probs[1].item()
             
             return {
-                "label": label,
-                "score": float(score)
+                "label": predicted_label,
+                "score": float(predicted_score),
+                "top2": {
+                    "labels": [labels[idx.item()] for idx in top2_indices],
+                    "scores": [float(prob) for prob in top2_probs]
+                }
             }
             
         except Exception as e:
