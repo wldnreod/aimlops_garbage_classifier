@@ -27,11 +27,12 @@ steps:
       - '--region=asia-northeast3'
       - '--platform=managed'
       - '--allow-unauthenticated'
-      - '--memory=2Gi'
-      - '--cpu=2'
+      - '--memory=4Gi'
+      - '--cpu=4'
       - '--max-instances=10'
-      - '--timeout=300'
+      - '--timeout=600'
       - '--no-cpu-throttling'
+      - '--port=8080'
 
 images:
   - 'gcr.io/$PROJECT_ID/garbage-classifier:$SHORT_SHA'
