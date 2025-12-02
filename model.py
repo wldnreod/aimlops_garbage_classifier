@@ -57,7 +57,7 @@ class GarbageClassifier:
             # Glass vs Plastic 혼동 방지: 차이가 작으면 Plastic 우선
             if predicted_label == "Glass" and top2_indices[1].item() == 7:  # 7 = Plastic
                 prob_diff = top2_probs[0].item() - top2_probs[1].item()
-                if prob_diff < 0.15:  # 차이가 15% 미만이면 Plastic으로
+                if prob_diff < 0.25:  # 차이가 25% 미만이면 Plastic으로 (기존 15%에서 증가)
                     logger.info(f"Glass({top2_probs[0].item():.3f}) vs Plastic({top2_probs[1].item():.3f}) - Plastic 선택")
                     predicted_idx = 7
                     predicted_label = "Plastic"
