@@ -1,7 +1,6 @@
 from PIL import Image
-from transformers import AutoModelForImageClassification
+from transformers import AutoImageProcessor, SiglipForImageClassification
 import torch
-from torchvision import transforms
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -9,24 +8,19 @@ logger = logging.getLogger(__name__)
 
 class GarbageClassifier:
     def __init__(self):
-        self.model_name = "yangy50/garbage-classification"
+        self.model_name = "prithivMLmods/Augmented-Waste-Classifier-SigLIP2"
         self.model = None
-        self.transform = None
+        self.processor = None
         self._load_model()
     
     def _load_model(self):
         try:
             logger.info(f"모델 로딩 시작: {self.model_name}")
-            self.model = AutoModelForImageClassification.from_pretrained(self.model_name)
+            self.model = SiglipForImageClassification.from_pretrained(self.model_name)
+            self.processor = AutoImageProcessor.from_pretrained(self.model_name)
             self.model.eval()
             
-            self.transform = transforms.Compose([
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
-            
-            logger.info("모델 로드 성공")
+            logger.info("모델 로드 성공 - SigLIP2 (99.26% accuracy, 10 classes)")
         except Exception as e:
             logger.error(f"모델 로드 실패: {str(e)}")
             raise
@@ -39,14 +33,22 @@ class GarbageClassifier:
             if image.mode != 'RGB':
                 image = image.convert('RGB')
             
-            input_tensor = self.transform(image).unsqueeze(0)
+            # SigLIP processor 사용
+            inputs = self.processor(images=image, return_tensors="pt")
             
             with torch.no_grad():
-                outputs = self.model(input_tensor)
-                probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+                outputs = self.model(**inputs)
+                probs = torch.nn.functional.softmax(outputs.logits, dim=1).squeeze()
                 confidence, predicted_idx = torch.max(probs, dim=-1)
             
-            label = self.model.config.id2label[predicted_idx.item()]
+            # 10개 클래스 라벨
+            labels = {
+                0: "Battery", 1: "Biological", 2: "Cardboard", 3: "Clothes",
+                4: "Glass", 5: "Metal", 6: "Paper", 7: "Plastic",
+                8: "Shoes", 9: "Trash"
+            }
+            
+            label = labels[predicted_idx.item()]
             score = confidence.item()
             
             return {
