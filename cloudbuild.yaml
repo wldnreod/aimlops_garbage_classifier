@@ -30,6 +30,8 @@ steps:
       - '--memory=2Gi'
       - '--cpu=2'
       - '--max-instances=10'
+      - '--timeout=300'
+      - '--no-cpu-throttling'
 
 images:
   - 'gcr.io/$PROJECT_ID/garbage-classifier:$SHORT_SHA'
