@@ -4,7 +4,7 @@ uvicorn[standard]==0.24.0
 python-multipart==0.0.6
 
 # ML dependencies
-transformers==4.35.2
+transformers==4.41.0
 torch==2.1.1
 torchvision==0.16.1
 pillow==10.1.0
