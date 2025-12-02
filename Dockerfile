@@ -4,6 +4,10 @@ FROM python:3.11-slim
 # 작업 디렉토리 설정
 WORKDIR /app
 
+# 빌드 타임스탬프 (캐시 무효화용)
+ARG BUILD_DATE=unknown
+ENV BUILD_DATE=${BUILD_DATE}
+
 # 시스템 패키지 업데이트 및 필수 라이브러리 설치
 RUN apt-get update && apt-get install -y \
     gcc \
