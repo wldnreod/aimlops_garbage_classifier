@@ -18,6 +18,14 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# 모델 미리 다운로드 (시작 시간 단축)
+RUN python -c "from transformers import AutoImageProcessor, SiglipForImageClassification; \
+    model_name='prithivMLmods/Augmented-Waste-Classifier-SigLIP2'; \
+    print('모델 다운로드 시작...'); \
+    SiglipForImageClassification.from_pretrained(model_name); \
+    AutoImageProcessor.from_pretrained(model_name); \
+    print('모델 다운로드 완료!')"
+
 # 애플리케이션 코드 복사
 COPY main.py .
 COPY model.py .
