@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1079222481108",
+    "project_id": "garbage-classifier-27697",
+    "storage_bucket": "garbage-classifier-27697.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1079222481108:android:b4f23e30e1f59b0c56cb41",
+        "android_client_info": {
+          "package_name": "com.example.garbageclassifier"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1079222481108-3ne6vsdiativ7iaicmtb3utvi4d1nasl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.garbageclassifier",
+            "certificate_hash": "90ddb81e533a1c246df9854a7e3f3b65fa998b7c"
+          }
+        },
+        {
+          "client_id": "1079222481108-ff4bdmplndmtapgmrsqru89ucagajsll.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.garbageclassifier",
+            "certificate_hash": "cc59d63e0f32932d1f4fe32e9d4f3f4d1a7f4caa"
+          }
+        },
+        {
+          "client_id": "1079222481108-t2f8q8e3661ootaag46sspivlgbnjvs5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIh13DKB-fjEiKwM_8ve8duqe5vacU5QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1079222481108-t2f8q8e3661ootaag46sspivlgbnjvs5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
