@@ -27,7 +27,7 @@ const wasteInfo = {
 
 // Google Sign-In 설정
 GoogleSignin.configure({
-  webClientId: '1079222481108-3ne6vsdiativ7iaicmtb3utvi4d1nasl.apps.googleusercontent.com', // Android client from google-services.json
+  webClientId: '1079222481108-ff4bdmplndmtapgmrsqru89ucagajsll.apps.googleusercontent.com', // Android client with SHA-1: CC:59:D6...
 });
 
 export default function App() {
